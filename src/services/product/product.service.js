@@ -2,14 +2,10 @@ import Product from "../../models/Product.js";
 import Category from "../../models/category.model.js";
 
 export const createProduct = async (data) => {
-  const category = Category.findById(data.category);
-  if (!category || !category.isActive) {
-    throw new Error("Invalid category");
+  const product = await Product.create(data);
 
-    const product = await Product.create(data);
-
-    return product.populate("category", "name slug");
-  }
+  // Populate category information
+  return await product.populate("category", "name slug");
 };
 
 export const getProducts = async () => {
@@ -31,35 +27,17 @@ export const getProductById = async (id) => {
 
 export const updateProduct = async (id, data) => {
   if (data.category) {
-    const category = await Category.findById(
-      data.category
-    );
+    const category = await Category.findById(data.category);
 
     if (!category || !category.isActive) {
       throw new Error("Invalid category");
     }
   }
 
-  const product = await Product.findByIdAndUpdate(
-    id,
-    data,
-    {
-      new: true,
-      runValidators: true,
-    }
-  ).populate("category", "name slug");
+  const product = await Product.findByIdAndUpdate(id, data, {
+    new: true,
+    runValidators: true,
+  }).populate("category", "name slug");
 
   return product;
-};
-
-export const deleteProduct = async (id) => {
-  return Product.findByIdAndUpdate(
-    id,
-    {
-      isActive: false,
-    },
-    {
-      new: true,
-    }
-  );
 };

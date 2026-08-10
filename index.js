@@ -8,6 +8,7 @@ import helmet from "helmet";
 import connectDB from "./src/config/connectDB.js";
 import userRoutes from "./src/routes/users/userRoutes.js";
 import CategoryRouter from "./src/routes/category/categoryRoutes.js";
+import productRouter from "./src/routes/products/productRoutes.js";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,7 +23,7 @@ app.use(
     credentials: true, // Allow credentials (cookies, authorization headers)
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 //middlewares
@@ -33,12 +34,13 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
-  })
+  }),
 );
 
 // Routes
-app.use("/users/v1", userRoutes);
-app.use("/category/v1", CategoryRouter);
+app.use("/v1/user", userRoutes);
+app.use("/v1/category", CategoryRouter);
+app.use("/v1/product", productRouter);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

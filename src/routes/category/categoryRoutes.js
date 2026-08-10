@@ -6,7 +6,7 @@ import {
 import  {authMiddleware, authorize} from "../../middlewares/auth.js";
 const CategoryRouter = express.Router();
 
-CategoryRouter.post("/create", authMiddleware,authorize("admin"), createCategoryController);
+CategoryRouter.post("/create", authMiddleware,authorize("ADMIN"), createCategoryController);
 CategoryRouter.get("/all", authMiddleware, fetchAllCategories);
 
 export default CategoryRouter;

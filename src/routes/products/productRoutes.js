@@ -4,19 +4,19 @@ import {
   getProductById,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
 } from "../../controller/product/productController.js";
-import {authMiddleware, authorize} from "../../middlewares/auth.js";
-const productproductRouter = express.productRouter();
+import { authMiddleware, authorize } from "../../middlewares/auth.js";
+const productRouter = express.Router();
 
-productRouter.get("/",getProducts);
+productRouter.get("/", getProducts);
 
 productRouter.get("/:id", getProductById);
 
-productRouter.post("/", authMiddleware, authorize("admin"), createProduct);
+productRouter.post("/", authMiddleware, authorize("ADMIN"), createProduct);
 
-productRouter.put("/:id", authMiddleware, authorize("admin"), updateProduct);
+productRouter.put("/:id", authMiddleware, authorize("ADMIN"), updateProduct);
 
-productRouter.delete("/:id", authMiddleware, authorize("admin"), deleteProduct);
+productRouter.delete("/:id", authMiddleware, authorize("ADMIN"), deleteProduct);
 
-export default productproductRouter;
+export default productRouter;
