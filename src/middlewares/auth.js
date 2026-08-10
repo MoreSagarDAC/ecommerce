@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+// authentication middleware
 
-const authMiddleware = async (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
   try {
     // Extract token from Authorization header (Bearer token) or cookies
     // Handle undefined cookies safely
@@ -31,4 +32,21 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-export default authMiddleware;
+export const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Authentication required",
+      });
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: "You are not authorized to perform this action",
+      });
+    }
+
+    next();
+  };
+};
+

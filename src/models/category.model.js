@@ -1,25 +1,37 @@
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 
-const categoryScheema = mongoose.Schema(
+const categorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      default: "",
-      require: true,
-    },
-    image: [
-      {
-        type: String,
-      },
-    ],
-    parentCatName: {
-      type: String,
-      default: "",
+      required: true,
+      unique: true,
+      trim: true,
+      maxlength: 100,
     },
 
-    parentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "category",
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+    },
+
+    image: {
+      type: String,
+      default: null,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {
@@ -27,5 +39,9 @@ const categoryScheema = mongoose.Schema(
   }
 );
 
-const CategoryModel = mongoose.model("category", categoryScheema);
-export default CategoryModel;
+const Category = mongoose.model(
+  "Category",
+  categorySchema
+);
+
+export default Category;

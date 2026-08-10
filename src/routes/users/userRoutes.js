@@ -6,7 +6,7 @@ import {
   userLogout,
 } from "../../controller/users/user.js";
 import { forgotPassword, resetPassword } from "../../controller/users/passwordController.js"
-import authMiddleware from "../../middlewares/auth.js";
+import {authMiddleware} from "../../middlewares/auth.js";
 const UserRouter = express.Router();
 
 UserRouter.post("/register", registerUser);
