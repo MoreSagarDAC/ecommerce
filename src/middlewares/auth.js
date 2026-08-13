@@ -13,7 +13,6 @@ export const authMiddleware = async (req, res, next) => {
       token = token.substring(7); // Remove "Bearer " prefix
     }
 
-
     if (!token) {
       return res.status(401).json({ message: "Provide token" });
     }
@@ -49,4 +48,3 @@ export const authorize = (...roles) => {
     next();
   };
 };
-

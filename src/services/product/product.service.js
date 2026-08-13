@@ -41,3 +41,9 @@ export const updateProduct = async (id, data) => {
 
   return product;
 };
+
+export const deleteProduct = async (id) => {
+  return Product.deleteOne({
+    _id: id,
+  });
+};

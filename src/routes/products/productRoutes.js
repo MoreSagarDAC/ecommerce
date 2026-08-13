@@ -9,7 +9,7 @@ import {
 import { authMiddleware, authorize } from "../../middlewares/auth.js";
 const productRouter = express.Router();
 
-productRouter.get("/", getProducts);
+productRouter.get("/all", getProducts);
 
 productRouter.get("/:id", getProductById);
 

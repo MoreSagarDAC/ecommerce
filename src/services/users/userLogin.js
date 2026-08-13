@@ -86,8 +86,6 @@ const userLogin = async (email, password) => {
     throw new Error("Invalid password");
   }
 
-  console.log("USER ROLE FROM DB:", user.role);
-  console.log("USER ID FROM DB:", user._id);
 
   // Generate access token
   const token = generateToken(
