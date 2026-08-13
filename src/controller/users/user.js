@@ -1,6 +1,5 @@
 import {
   initiateRegistration,
-  verifyRegistrationOTP,
 } from "../../services/users/userRegister.js";
 import userLogin from "../../services/users/userLogin.js";
 import userLogoutService from "../../services/users/userLogout.js";
@@ -33,44 +32,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-const verifyOTP = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
 
-    // Validate input
-    if (!email || !otp) {
-      return res.status(400).json({
-        message: "Email and OTP are required",
-        status: false,
-        error: true,
-      });
-    }
-
-    // Validate OTP format (6 digits)
-    if (!/^\d{6}$/.test(otp)) {
-      return res.status(400).json({
-        message: "OTP must be a 6-digit number",
-        status: false,
-        error: true,
-      });
-    }
-
-    // Verify OTP and complete registration
-    const user = await verifyRegistrationOTP(email, otp);
-
-    return res.status(200).json({
-      message: "Email verified successfully. Registration completed!",
-      status: true,
-      user: user,
-    });
-  } catch (error) {
-    return res.status(400).json({
-      message: error.message || "OTP verification failed",
-      status: false,
-      error: true,
-    });
-  }
-};
 
 const userExistingLogin = async (req, res) => {
   try {
@@ -116,4 +78,4 @@ const userLogout = async (req, res) => {
     });
   }
 };
-export { registerUser, verifyOTP, userExistingLogin, userLogout };
+export { registerUser, userExistingLogin, userLogout };
