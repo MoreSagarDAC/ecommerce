@@ -9,6 +9,8 @@ import connectDB from "./src/config/connectDB.js";
 import userRoutes from "./src/routes/users/userRoutes.js";
 import CategoryRouter from "./src/routes/category/categoryRoutes.js";
 import productRouter from "./src/routes/products/productRoutes.js";
+import cartRouter from "./src/routes/cart/cartRoutes.js";
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,6 +43,7 @@ app.use(
 app.use("/v1/user", userRoutes);
 app.use("/v1/category", CategoryRouter);
 app.use("/v1/product", productRouter);
+app.use("/v1/cart", cartRouter);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

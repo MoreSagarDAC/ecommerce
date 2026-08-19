@@ -23,7 +23,10 @@ export const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid token" });
     }
 
-    req.user = decoded;
+    req.user = {
+      id: decoded.userId,
+      role: decoded.role,
+    };
     next();
   } catch (error) {
     console.error("Auth Middleware Error:", error.message);
