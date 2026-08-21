@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import UserModel from "../models/user.model.js";
 // authentication middleware
 
 export const authMiddleware = async (req, res, next) => {
@@ -21,6 +22,21 @@ export const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
       return res.status(401).json({ message: "Invalid token" });
+    }
+
+    const user = await UserModel.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).json({
+        message: "User not found",
+      });
+    }
+
+    // 3. Check whether token matches DB
+    if (user.token !== token) {
+      return res.status(401).json({
+        message: "Token is invalid or user logged out",
+      });
     }
 
     req.user = {
