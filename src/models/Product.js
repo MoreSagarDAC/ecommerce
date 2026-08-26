@@ -94,13 +94,21 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+productSchema.index({ slug: 1 });
+
+// Main catalog
 productSchema.index({
-  name: "text",
-  description: "text",
+  isActive: 1,
+  createdAt: -1,
+  _id: -1,
 });
 
+// Category catalog
 productSchema.index({
+  isActive: 1,
   category: 1,
+  createdAt: -1,
+  _id: -1,
 });
 
 const Product = mongoose.model(
