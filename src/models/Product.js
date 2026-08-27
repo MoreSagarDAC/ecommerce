@@ -94,7 +94,7 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-productSchema.index({ slug: 1 });
+// productSchema.index({ slug: 1 });
 
 // Main catalog
 productSchema.index({

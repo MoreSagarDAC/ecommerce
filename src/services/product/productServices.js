@@ -1,5 +1,13 @@
 import Product from "../../models/Product.js";
 import Category from "../../models/category.model.js";
+import {
+  getCache,
+  setCache,
+  deleteCache,
+} from "../../config/shared/cache/redis.service.js";
+import { CACHE_KEYS } from "../../config/shared/cache/cacheKeys.js";
+
+const PRODUCT_CACHE_TTL = 60 * 10;
 
 export const createProduct = async (data) => {
   const product = await Product.create(data);
@@ -19,10 +27,30 @@ export const getProducts = async () => {
 };
 
 export const getProductById = async (id) => {
-  return Product.findOne({
+  const cacheKey = CACHE_KEYS.product.byId(id);
+  const cachedProduct = await getCache(cacheKey);
+
+  if (cachedProduct) {
+    console.log(`[REDIS HIT] ${cacheKey}`);
+    return cachedProduct;
+  }
+
+  console.log(`[REDIS MISS] ${cacheKey}`);
+  const product = await Product.findOne({
     _id: id,
     isActive: true,
-  }).populate("category", "name slug");
+  })
+    .populate("category", "name slug")
+    .lean();
+
+  // 3. Don't cache null products
+  if (!product) {
+    return null;
+  }
+
+  // 4. Save in Redis
+  await setCache(cacheKey, product, PRODUCT_CACHE_TTL);
+  return product;
 };
 
 export const updateProduct = async (id, data) => {
@@ -39,11 +67,24 @@ export const updateProduct = async (id, data) => {
     runValidators: true,
   }).populate("category", "name slug");
 
+  // MongoDB updated successfully
+  // Now remove old Redis data
+  if (product) {
+    await deleteCache(CACHE_KEYS.product.byId(id));
+  }
+
   return product;
 };
 
 export const deleteProduct = async (id) => {
-  return Product.deleteOne({
+  const result = await Product.deleteOne({
     _id: id,
   });
+
+  // Only invalidate cache if MongoDB delete succeeded
+  if (result.deletedCount > 0) {
+    await deleteCache(CACHE_KEYS.product.byId(id));
+  }
+
+  return result;
 };

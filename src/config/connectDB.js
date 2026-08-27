@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { connectRedis } from "./redisClient.js";
 
 const connectDB = async () => {
   try {
@@ -7,6 +8,12 @@ const connectDB = async () => {
   } catch (error) {
     console.error("MongoDB Connection Error:", error.message);
     process.exit(1);
+  }
+
+  try {
+    await connectRedis();
+  } catch (error) {
+    console.error("Redis is unavailable; cache will be skipped:", error.message);
   }
 };
 
