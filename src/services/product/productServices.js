@@ -27,15 +27,22 @@ export const getProducts = async () => {
 };
 
 export const getProductById = async (id) => {
+  const start = performance.now();
+
   const cacheKey = CACHE_KEYS.product.byId(id);
+
   const cachedProduct = await getCache(cacheKey);
 
   if (cachedProduct) {
-    console.log(`[REDIS HIT] ${cacheKey}`);
+    const duration = (performance.now() - start).toFixed(2);
+
+    console.log(`[REDIS HIT] ${cacheKey} | ${duration}ms`);
+
     return cachedProduct;
   }
 
   console.log(`[REDIS MISS] ${cacheKey}`);
+
   const product = await Product.findOne({
     _id: id,
     isActive: true,
@@ -43,13 +50,16 @@ export const getProductById = async (id) => {
     .populate("category", "name slug")
     .lean();
 
-  // 3. Don't cache null products
   if (!product) {
     return null;
   }
 
-  // 4. Save in Redis
   await setCache(cacheKey, product, PRODUCT_CACHE_TTL);
+
+  const duration = (performance.now() - start).toFixed(2);
+
+  console.log(`[MONGODB] ${cacheKey} | ${duration}ms`);
+
   return product;
 };
 
