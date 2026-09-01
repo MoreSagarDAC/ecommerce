@@ -1,22 +1,36 @@
 import UserModel from "../../models/user.model.js";
 import bcrypt from "bcrypt";
+import CryptoJS from "crypto-js";
 
+const decryptField = (value) => {
+  if (!value || !value.startsWith("U2FsdGVkX1")) return value;
+  const key =
+    process.env.VITE_ENCRYPTION_KEY ||
+    process.env.ENCRYPTION_KEY ||
+    process.env.JWT_SECRET ||
+    "default-secret-key";
+  const bytes = CryptoJS.AES.decrypt(value, key);
+  const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+  if (!decrypted) throw new Error("Decryption failed");
+  return decrypted;
+};
 
 const initiateRegistration = async (userData) => {
-  const { name, email, password } = userData;
-  const existingUser = await UserModel.findOne({ email });
+  const decryptedEmail = decryptField(userData.email);
+  const decryptedPassword = decryptField(userData.password);
+
+  const existingUser = await UserModel.findOne({ email: decryptedEmail });
   if (existingUser) {
     throw new Error("User already exists with this email");
   }
 
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(decryptedPassword, 10);
 
-  // Prepare user data with all fields from body
   const userDataToSave = {
-    ...userData, // Save all fields from body (name, email, phone_number, avatar, etc.)
-    password: hashedPassword, // Replace plain password with hashed password
-    verify_email: true, 
+    ...userData,
+    email: decryptedEmail,
+    password: hashedPassword,
+    verify_email: true,
   };
 
   const user = await UserModel.create(userDataToSave);
@@ -26,6 +40,5 @@ const initiateRegistration = async (userData) => {
 
   return userResponse;
 };
-
 
 export { initiateRegistration };
