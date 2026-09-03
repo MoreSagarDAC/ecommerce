@@ -30,9 +30,14 @@ export const setCache = async (key, value, ttlSeconds) => {
   }
 
   try {
-    await redisClient.set(key, JSON.stringify(value), {
-      EX: ttlSeconds,
-    });
+    // await redisClient.set(key, JSON.stringify(value), {
+    //   EX: ttlSeconds,
+    // });
+      await redisClient.setEx(
+    cacheKey,
+    300,
+    JSON.stringify(product)
+  );
 
     return true;
   } catch (error) {
