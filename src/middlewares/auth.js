@@ -4,49 +4,51 @@ import UserModel from "../models/user.model.js";
 
 export const authMiddleware = async (req, res, next) => {
   try {
-    // Extract token from Authorization header (Bearer token) or cookies
-    // Handle undefined cookies safely
-    const cookies = req.cookies || {};
-    let token = req.headers.authorization || cookies.token;
+    const authHeader = req.headers.authorization;
 
-    // If token is in "Bearer <token>" format, extract just the token
-    if (token && token.startsWith("Bearer ")) {
-      token = token.substring(7); // Remove "Bearer " prefix
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({
+        success: false,
+        code: "AUTH_REQUIRED",
+        message: "Authentication required",
+      });
     }
 
-    if (!token) {
-      return res.status(401).json({ message: "Provide token" });
-    }
+    const token = authHeader.split(" ")[1];
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
-      return res.status(401).json({ message: "Invalid token" });
-    }
 
     const user = await UserModel.findById(decoded.userId);
 
     if (!user) {
       return res.status(401).json({
+        success: false,
+        code: "USER_NOT_FOUND",
         message: "User not found",
       });
     }
 
-    // 3. Check whether token matches DB
-    if (user.token !== token) {
-      return res.status(401).json({
-        message: "Token is invalid or user logged out",
-      });
-    }
-
     req.user = {
-      id: decoded.userId,
-      role: decoded.role,
+      id: user._id,
+      role: user.role,
     };
     next();
   } catch (error) {
     console.error("Auth Middleware Error:", error.message);
-    return res.status(401).json({ message: "Unauthorized" });
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        code: "TOKEN_EXPIRED",
+        message: "Session expired",
+      });
+    }
+
+    return res.status(401).json({
+      success: false,
+      code: "INVALID_TOKEN",
+      message: "Invalid authentication token",
+    });
   }
 };
 
