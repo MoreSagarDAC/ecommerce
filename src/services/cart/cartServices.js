@@ -1,4 +1,4 @@
-import Product from "../../models/Product.js";
+import Product from "../../models/product.model.js";
 import CartProduct from "../../models/cartProduct.model.js";
 const addToCart = async (userId, productId, quantity = 1) => {
   if (!productId) {

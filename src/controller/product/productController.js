@@ -1,5 +1,5 @@
 import * as productService from "../../services/product/productServices.js";
-import Product from "../../models/Product.js";
+import Product from "../../models/product.model.js";
 import { decodeCursor, encodeCursor } from "../../utils/cursor.js";
 export const createProduct = async (req, res) => {
   const product = await productService.createProduct(req.body);

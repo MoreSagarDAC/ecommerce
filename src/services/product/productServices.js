@@ -1,4 +1,4 @@
-import Product from "../../models/Product.js";
+import Product from "../../models/product.model.js";
 import Category from "../../models/category.model.js";
 import {
   getCache,
