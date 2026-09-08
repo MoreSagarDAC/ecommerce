@@ -12,7 +12,7 @@ import productRouter from "./src/routes/products/productRoutes.js";
 import cartRouter from "./src/routes/cart/cartRoutes.js";
 import { requestId } from "./src/middlewares/requestId.middleware.js";
 import { errorHandler } from "./src/middlewares/error.middleware.js";
-
+import addressRouter from "./src/routes/order/address/addressRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -66,6 +66,7 @@ app.use("/v1/user", userRoutes);
 app.use("/v1/category", CategoryRouter);
 app.use("/v1/product", productRouter);
 app.use("/v1/cart", cartRouter);
+app.use("/v1/address", addressRouter);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
