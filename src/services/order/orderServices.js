@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import OrderModel from "../../models/orders.model.js";
 import OrderItemModel from "../../models/orderItems.model.js";
 import paymentModel from "../../models/payment.model.js";
+import productModel from "../../models/product.model.js"; // adjust filename/path to match your actual product model
+import CartProduct from "../../models/cartProduct.model.js";
 import { generateOrderId, generateTransactionId } from "../../utils/utils.js";
 
 export const saveOrder = async (orderData) => {
@@ -80,6 +82,20 @@ export const saveOrder = async (orderData) => {
       }));
       await OrderItemModel.insertMany(itemsWithOrderId, { session });
 
+      for (const item of orderData.orderData.orderItems) {
+        const updatedProduct = await productModel.findOneAndUpdate(
+          { _id: item.productId, stock: { $gte: item.quantity } },
+          { $inc: { stock: -item.quantity } },
+          { session, new: true },
+        );
+
+        if (!updatedProduct) {
+          throw new Error(
+            `Insufficient stock for product ${item.productName || item.productId}`,
+          );
+        }
+      }
+
       const [createdPayment] = await paymentModel.create(
         [
           {
@@ -95,11 +111,15 @@ export const saveOrder = async (orderData) => {
         { session },
       );
       payment = createdPayment;
-
+      const userId = orderData?.orderData?.userId;
       order.paymentId = payment._id;
-      console.log("session : ", session);
 
       await order.save({ session });
+
+      await CartProduct.deleteMany(
+        { userId, productId: { $in: productIds } },
+        { session },
+      );
     });
 
     return { order, payment };
