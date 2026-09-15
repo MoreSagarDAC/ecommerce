@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import payments from "razorpay/dist/types/payments";
+import { paymentStatus, orderStatus } from "../utils/constant.js";
 
 const orderSchema = mongoose.Schema(
   {
@@ -13,28 +13,35 @@ const orderSchema = mongoose.Schema(
       ref: "user",
       required: true,
     },
-    productId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "product",
+    productIds: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "product",
+        },
+      ],
       required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-    },
-    product_details: {
-      type: String,
-      image: Array,
+      validate: {
+        validator: (ids) => Array.isArray(ids) && ids.length > 0,
+        message: "At least one product is required.",
+      },
     },
     paymentId: {
-      type: String,
-      default: "",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "payment",
+      default: null,
     },
-    payment_status: {
+    paymentStatus: {
       type: String,
-      default: "",
+      enum: paymentStatus,
+      default: "PENDING",
     },
-    delivery_address: {
+    orderStatus: {
+      type: String,
+      enum: orderStatus,
+      default: "PENDING",
+    },
+    deliveryAddress: {
       type: mongoose.Schema.ObjectId,
       ref: "address",
     },
@@ -48,8 +55,8 @@ const orderSchema = mongoose.Schema(
     },
   },
   {
-    timestamp: true,
-  }
+    timestamps: true,
+  },
 );
 
 const OrderModel = mongoose.model("orders", orderSchema);
