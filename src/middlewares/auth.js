@@ -18,6 +18,14 @@ export const authMiddleware = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    if (decoded.type === "refresh") {
+      return res.status(401).json({
+        success: false,
+        code: "INVALID_TOKEN",
+        message: "Invalid authentication token",
+      });
+    }
+
     const user = await UserModel.findById(decoded.userId);
 
     if (!user) {

@@ -3,6 +3,7 @@ import {
   registerUser,
   userExistingLogin,
   userLogout,
+  refreshToken,
 } from "../../controller/users/user.js";
 import { forgotPassword, resetPassword } from "../../controller/users/passwordController.js"
 import {authMiddleware} from "../../middlewares/auth.js";
@@ -10,6 +11,7 @@ const UserRouter = express.Router();
 
 UserRouter.post("/register", registerUser);
 UserRouter.post("/login", userExistingLogin);
+UserRouter.post("/refresh-token", refreshToken);
 UserRouter.post("/logout", authMiddleware, userLogout);
 UserRouter.post("/forgot-password", forgotPassword);
 UserRouter.post("/reset-password", resetPassword);

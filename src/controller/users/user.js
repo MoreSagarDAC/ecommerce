@@ -3,6 +3,7 @@ import {
 } from "../../services/users/userRegister.js";
 import userLogin from "../../services/users/userLogin.js";
 import userLogoutService from "../../services/users/userLogout.js";
+import refreshAccessToken from "../../services/users/refreshToken.js";
 
 const registerUser = async (req, res) => {
   try {
@@ -52,6 +53,29 @@ const userExistingLogin = async (req, res) => {
   }
 };
 
+const refreshToken = async (req, res) => {
+  try {
+    const refreshTokenValue =
+      req.body?.refreshToken || req.body?.refresh_token;
+
+    const tokens = await refreshAccessToken(refreshTokenValue);
+
+    return res.status(200).json({
+      message: "Token refreshed successfully",
+      status: true,
+      token: tokens.token,
+      refreshToken: tokens.refreshToken,
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 401).json({
+      message: error.message || "Unable to refresh token",
+      status: false,
+      error: true,
+      code: error.code || "INVALID_TOKEN",
+    });
+  }
+};
+
 const userLogout = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -78,4 +102,4 @@ const userLogout = async (req, res) => {
     });
   }
 };
-export { registerUser, userExistingLogin, userLogout };
+export { registerUser, userExistingLogin, userLogout, refreshToken };
