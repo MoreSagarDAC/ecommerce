@@ -130,3 +130,95 @@ export const saveOrder = async (orderData) => {
     session.endSession();
   }
 };
+
+const mapOrderListItem = (order, itemCount = 0) => ({
+  _id: order._id,
+  orderNumber: order.orderId,
+  customer: order.userId?.name || "",
+  items: itemCount,
+  totalAmount: order.totalAmt,
+  paymentStatus: order.paymentStatus,
+  orderStatus: order.orderStatus,
+  createdAt: order.createdAt,
+});
+
+export const getUserOrders = async (userId) => {
+  if (!userId) {
+    throw new Error("UserId is required.");
+  }
+
+  const orders = await OrderModel.find({ userId })
+    .populate("userId", "name email")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  if (!orders.length) {
+    return [];
+  }
+
+  const orderObjectIds = orders.map((order) => order._id);
+
+  const itemCounts = await OrderItemModel.aggregate([
+    {
+      $match: {
+        orderId: { $in: orderObjectIds },
+      },
+    },
+    {
+      $group: {
+        _id: "$orderId",
+        items: { $sum: "$quantity" },
+      },
+    },
+  ]);
+
+  const itemCountByOrderId = new Map(
+    itemCounts.map((entry) => [String(entry._id), entry.items]),
+  );
+
+  return orders.map((order) =>
+    mapOrderListItem(
+      order,
+      itemCountByOrderId.get(String(order._id)) || order.productIds?.length || 0,
+    ),
+  );
+};
+
+export const getOrderById = async (userId, orderId) => {
+  if (!userId) {
+    throw new Error("UserId is required.");
+  }
+
+  if (!orderId) {
+    throw new Error("OrderId is required.");
+  }
+
+  const order = await OrderModel.findOne({
+    _id: orderId,
+    userId,
+  })
+    .populate("userId", "name email")
+    .populate("deliveryAddress")
+    .populate("paymentId")
+    .lean();
+
+  if (!order) {
+    throw new Error("Order not found.");
+  }
+
+  const orderItems = await OrderItemModel.find({
+    orderId: order._id,
+  }).lean();
+
+  const itemCount = orderItems.reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0,
+  );
+
+  return {
+    ...mapOrderListItem(order, itemCount),
+    deliveryAddress: order.deliveryAddress || null,
+    payment: order.paymentId || null,
+    orderItems,
+  };
+};
